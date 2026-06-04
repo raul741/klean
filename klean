@@ -36,9 +36,9 @@ def err(msg):
 def main():
     users = []
     p = argparse.ArgumentParser(description="convert exported kaduu csvs into a markdown friendly format")
-    #outs = p.add_mutually_exclusive_group()
-    #outs.add_argument("-l","--logins", required=False, help="only output logins")
-    #outs.add_argument("-p","--passwords", required=False, help="only output passwords")
+    outs = p.add_mutually_exclusive_group()
+    outs.add_argument("-l","--logins", required=False, help="only output logins", action="store_true")
+    outs.add_argument("-p","--passwords", required=False, help="only output passwords", action="store_true")
 
     p.add_argument("-i","--input", required=True, help="input kaduu csv")
     args = p.parse_args()
@@ -66,10 +66,22 @@ def main():
                         website=row["website"]
                     )]
                 ))
-    for user in users:
-        print(f"* {user.login}")
-        for cred in user.credentials:
-            print(f"  * {cred.password} ({cred.website})")
+    if args.logins:
+        for user in users:
+            print(f"{user.login}")
+    elif args.passwords:
+        uniq_passwords = []
+        for user in users:
+            for cred in user.credentials:
+                if cred.password not in uniq_passwords:
+                    uniq_passwords.append(cred.password)
+        for pw in uniq_passwords:
+            print(pw)
+    else:
+        for user in users:
+            print(f"* {user.login}")
+            for cred in user.credentials:
+                print(f"  * {cred.password} ({cred.website})")
     
 
 if __name__ == "__main__":
