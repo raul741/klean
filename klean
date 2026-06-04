@@ -1,0 +1,76 @@
+#!/usr/bin/python3
+import base64, argparse, os, csv
+
+class Credential():
+    def __init__(self, password: str, website: str):
+        self.password = password
+        self.website = website
+
+
+class User():
+    def __init__(self, login, credentials: list[Credential]):
+        self.login = login
+        self.credentials = credentials
+
+
+def isBase64(s):
+    try:
+        return base64.b64encode(base64.b64decode(s)) == s
+    except Exception:
+        return False
+
+
+def valid_file(path: str):
+    return os.path.isfile(path)
+
+
+def log(msg):
+    print(f"[+] {msg}")
+
+
+def err(msg):
+    print(f"[-] {msg}")
+    exit(2)
+
+
+def main():
+    users = []
+    p = argparse.ArgumentParser(description="convert exported kaduu csvs into a markdown friendly format")
+    #outs = p.add_mutually_exclusive_group()
+    #outs.add_argument("-l","--logins", required=False, help="only output logins")
+    #outs.add_argument("-p","--passwords", required=False, help="only output passwords")
+
+    p.add_argument("-i","--input", required=True, help="input kaduu csv")
+    args = p.parse_args()
+    if not valid_file(args.input):
+        err(f"{args.input} does not exist or is not a valid file!")
+
+    with open(args.input) as file:
+        reader = csv.DictReader(file)
+        for row in reader:
+            alreadyadded = False
+            for user in users:
+                if row["login"] == user.login:
+                    cred_exists = False
+                    for cred in user.credentials:
+                        if row["password"] == cred.password and row["website"] == cred.website:
+                            cred_exists = True
+                    if not cred_exists:
+                        user.credentials.append(Credential(password=row["password"], website=row["website"]))
+                    alreadyadded = True
+            if not alreadyadded:
+                users.append(User(
+                    login=row["login"],
+                    credentials=[Credential(
+                        password=row["password"],
+                        website=row["website"]
+                    )]
+                ))
+    for user in users:
+        print(f"* {user.login}")
+        for cred in user.credentials:
+            print(f"  * {cred.password} ({cred.website})")
+    
+
+if __name__ == "__main__":
+    main()
