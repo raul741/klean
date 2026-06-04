@@ -69,7 +69,11 @@ def main():
         for user in users:
             print(f"* {user.login}")
             for cred in user.credentials:
-                print(f"  * {cred.password} ({cred.website})")
+                out = f"  - {cred.password}"
+                if cred.website != "":
+                    out += f" ({cred.website})"
+                    pass
+                print(out)
     
 
 if __name__ == "__main__":
