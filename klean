@@ -1,11 +1,10 @@
 #!/usr/bin/python3
-import base64, argparse, os, csv
+import argparse, os, csv
 
 class Credential():
     def __init__(self, password: str, website: str):
         self.password = password
         self.website = website
-
 
 class User():
     def __init__(self, login, credentials: list[Credential]):
@@ -15,10 +14,6 @@ class User():
 
 def valid_file(path: str):
     return os.path.isfile(path)
-
-
-def log(msg):
-    print(f"[+] {msg}")
 
 
 def err(msg):
